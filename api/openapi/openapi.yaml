@@ -1,0 +1,305 @@
+openapi: 3.0.3
+info:
+  title: Teatchable API
+  version: 0.1.0
+  description: |
+    Multi-tenant course platform API. The API is served same-origin under `/api/v1` on every
+    host (see docs/adr/0003-same-origin-api.md):
+
+    - `{school}.yourapp.com` / custom domains: storefront and student endpoints
+    - `app.yourapp.com`: creator (account) endpoints
+    - any host: internal endpoints used by the edge proxy
+
+    Errors use RFC 9457 `application/problem+json`.
+servers:
+  - url: /api/v1
+tags:
+  - name: storefront
+  - name: accounts
+  - name: students
+  - name: internal
+
+paths:
+  /storefront/school:
+    get:
+      tags: [storefront]
+      operationId: getStorefrontSchool
+      summary: Public info for the school served on the current host
+      responses:
+        "200":
+          description: School
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicSchool" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /accounts/signup:
+    post:
+      tags: [accounts]
+      operationId: signupAccount
+      summary: Create a creator account and its first school (app host)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountSignupRequest" }
+      responses:
+        "201":
+          description: Account and school created; session cookie set
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountSession" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /accounts/login:
+    post:
+      tags: [accounts]
+      operationId: loginAccount
+      summary: Log in as a creator (app host)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Logged in; session cookie set
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountSession" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /accounts/logout:
+    post:
+      tags: [accounts]
+      operationId: logoutAccount
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Logged out; session cookie cleared
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /accounts/me:
+    get:
+      tags: [accounts]
+      operationId: getCurrentAccount
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Current account and its schools
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountSession" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /auth/signup:
+    post:
+      tags: [students]
+      operationId: signupStudent
+      summary: Create a student account in the school of the current host
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StudentSignupRequest" }
+      responses:
+        "201":
+          description: Student created; session cookie set
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /auth/login:
+    post:
+      tags: [students]
+      operationId: loginStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Logged in; session cookie set
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /auth/logout:
+    post:
+      tags: [students]
+      operationId: logoutStudent
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Logged out; session cookie cleared
+          headers:
+            Set-Cookie: { $ref: "#/components/headers/SetSessionCookie" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /me:
+    get:
+      tags: [students]
+      operationId: getCurrentStudent
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Current student
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Student" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /internal/tls-allowed:
+    get:
+      tags: [internal]
+      operationId: checkTLSAllowed
+      summary: Edge proxy asks whether it may issue a certificate for a domain (Caddy on_demand_tls ask)
+      parameters:
+        - name: domain
+          in: query
+          required: true
+          schema: { type: string, maxLength: 253 }
+      responses:
+        "200":
+          description: Certificate allowed
+        default: { $ref: "#/components/responses/Problem" }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sid
+
+  headers:
+    SetSessionCookie:
+      description: Session cookie (`sid`, or `__Host-sid` when served over HTTPS)
+      schema: { type: string }
+
+  responses:
+    Problem:
+      description: Error (RFC 9457)
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        code:
+          type: string
+          description: Stable machine readable error code, e.g. `email_taken`
+        detail: { type: string }
+        requestId: { type: string }
+
+    Locale:
+      type: string
+      enum: [ar, en]
+
+    Email:
+      type: string
+      format: email
+      maxLength: 254
+
+    Password:
+      type: string
+      minLength: 8
+      maxLength: 128
+
+    PublicSchool:
+      type: object
+      required: [id, name, subdomain, defaultLocale, currency]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        subdomain: { type: string }
+        defaultLocale: { $ref: "#/components/schemas/Locale" }
+        currency: { type: string, example: SAR }
+
+    AccountSignupRequest:
+      type: object
+      required: [email, password, name, schoolName, subdomain]
+      properties:
+        email: { $ref: "#/components/schemas/Email" }
+        password: { $ref: "#/components/schemas/Password" }
+        name: { type: string, minLength: 1, maxLength: 100 }
+        schoolName: { type: string, minLength: 1, maxLength: 100 }
+        subdomain:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$"
+          description: 3-32 chars, lower-case letters, digits and dashes
+        locale: { $ref: "#/components/schemas/Locale" }
+
+    StudentSignupRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email: { $ref: "#/components/schemas/Email" }
+        password: { $ref: "#/components/schemas/Password" }
+        name: { type: string, minLength: 1, maxLength: 100 }
+        locale: { $ref: "#/components/schemas/Locale" }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { $ref: "#/components/schemas/Email" }
+        password: { type: string, minLength: 1, maxLength: 128 }
+
+    Account:
+      type: object
+      required: [id, email, name, locale, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        name: { type: string }
+        locale: { $ref: "#/components/schemas/Locale" }
+        createdAt: { type: string, format: date-time }
+
+    SchoolMembership:
+      type: object
+      required: [schoolId, name, subdomain, role]
+      properties:
+        schoolId: { type: string, format: uuid }
+        name: { type: string }
+        subdomain: { type: string }
+        role:
+          type: string
+          enum: [owner, admin, author, support, finance]
+
+    AccountSession:
+      type: object
+      required: [account, schools]
+      properties:
+        account: { $ref: "#/components/schemas/Account" }
+        schools:
+          type: array
+          items: { $ref: "#/components/schemas/SchoolMembership" }
+
+    Student:
+      type: object
+      required: [id, email, name, locale, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        name: { type: string }
+        locale: { $ref: "#/components/schemas/Locale" }
+        createdAt: { type: string, format: date-time }

@@ -1,0 +1,69 @@
+{
+  "common": {
+    "brand": "Teatchable",
+    "language": "العربية",
+    "logout": "Log out",
+    "loading": "Loading…",
+    "notFound": "Page not found",
+    "backHome": "Back to home"
+  },
+  "marketing": {
+    "title": "Launch your online academy",
+    "subtitle": "Create courses, sell with mada and Apple Pay, and manage students in one place.",
+    "cta": "Start free",
+    "login": "Creator login"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "schoolName": "Academy name",
+    "subdomain": "Academy address",
+    "subdomainHint": "Lower-case letters, digits and dashes",
+    "login": "Log in",
+    "signup": "Sign up",
+    "creatorLoginTitle": "Creator login",
+    "creatorSignupTitle": "Create your academy",
+    "studentLoginTitle": "Log in",
+    "studentSignupTitle": "Create a student account",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "submitting": "Submitting…"
+  },
+  "errors": {
+    "email_taken": "This email is already registered.",
+    "subdomain_taken": "This address is taken, pick another one.",
+    "invalid_subdomain": "Address must be 3-32 lower-case letters, digits or dashes.",
+    "invalid_request": "Please check the fields.",
+    "unauthorized": "Wrong email or password.",
+    "forbidden": "This account is blocked.",
+    "generic": "Something went wrong, please try again."
+  },
+  "dashboard": {
+    "welcome": "Welcome, {name}",
+    "yourSchools": "Your academies",
+    "visit": "Visit site",
+    "role": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "author": "Author",
+      "support": "Support",
+      "finance": "Finance"
+    },
+    "nextSteps": "Next up: course builder (phase 1)."
+  },
+  "school": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "library": "My courses",
+    "heroTitle": "Welcome to {name}",
+    "heroSubtitle": "Courses are coming soon.",
+    "libraryTitle": "My courses",
+    "libraryEmpty": "You are not enrolled in any course yet.",
+    "greeting": "Hi {name}"
+  },
+  "platform": {
+    "title": "Platform admin",
+    "comingSoon": "Coming soon: schools, plans and fees."
+  }
+}

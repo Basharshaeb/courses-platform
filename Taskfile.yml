@@ -1,0 +1,93 @@
+# https://taskfile.dev — install: go install github.com/go-task/task/v3/cmd/task@latest
+version: "3"
+
+dotenv: ["backend/.env"]
+
+vars:
+  SPEC: api/openapi/openapi.yaml
+
+tasks:
+  setup:
+    desc: First-time setup (env files, web deps, containers, migrations, seed)
+    cmds:
+      - cmd: powershell -NoProfile -Command "if (!(Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }; if (!(Test-Path web/.env.local)) { Copy-Item web/.env.example web/.env.local }"
+        platforms: [windows]
+      - cmd: cp -n backend/.env.example backend/.env; cp -n web/.env.example web/.env.local
+        platforms: [linux, darwin]
+      - pnpm --dir web install
+      - task: deps:up
+      - task: migrate
+      - task: seed
+
+  deps:up:
+    desc: Start Postgres, Redis, MinIO, Mailpit, Gotenberg
+    cmds:
+      - docker compose up -d --wait
+
+  deps:down:
+    desc: Stop local containers (data volumes are kept)
+    cmds:
+      - docker compose down
+
+  migrate:
+    desc: Apply database migrations (goose + River)
+    dir: backend
+    cmds:
+      - go run ./cmd/migrate up
+
+  seed:
+    desc: Create demo creator, school and student
+    dir: backend
+    cmds:
+      - go run ./cmd/migrate seed
+
+  gen:
+    desc: Regenerate sqlc store, Go API server and TypeScript API types
+    cmds:
+      - cd backend && sqlc generate
+      - cd backend && go tool oapi-codegen -config oapi-codegen.yaml ../{{.SPEC}}
+      - pnpm --dir web gen:api
+
+  api:
+    desc: Run the API on :8080
+    dir: backend
+    cmds:
+      - go run ./cmd/api
+
+  worker:
+    desc: Run the background worker
+    dir: backend
+    cmds:
+      - go run ./cmd/worker
+
+  web:
+    desc: Run Next.js on :3000
+    cmds:
+      - pnpm --dir web dev
+
+  dev:
+    desc: Run api, worker and web together
+    deps: [api, worker, web]
+
+  test:
+    desc: Go tests incl. Postgres integration tests (needs Docker)
+    dir: backend
+    env:
+      # The testcontainers reaper does not start on Docker Desktop for Windows; tests clean up themselves.
+      TESTCONTAINERS_RYUK_DISABLED: '{{if eq OS "windows"}}true{{else}}false{{end}}'
+    cmds:
+      # -race needs cgo (gcc), which a default Windows Go install lacks.
+      - go test {{if ne OS "windows"}}-race {{end}}./...
+
+  test:short:
+    desc: Go unit tests only
+    dir: backend
+    cmds:
+      - go test -short ./...
+
+  lint:
+    desc: Lint Go and web
+    cmds:
+      - cd backend && golangci-lint run ./...
+      - pnpm --dir web lint
+      - pnpm --dir web typecheck

@@ -1,0 +1,37 @@
+# Edge proxy (production reference, not used in local dev).
+# Needs a Caddy build (xcaddy) with github.com/caddy-dns/cloudflare for the wildcard DNS-01
+# challenge, plus a shared certificate storage module (Redis or S3) when running several replicas.
+# Routing contract: docs/adr/0003-same-origin-api.md.
+{
+	email {$ACME_EMAIL}
+	on_demand_tls {
+		# The API answers 200 only for verified custom domains / existing schools.
+		ask http://api:8080/api/v1/internal/tls-allowed
+	}
+}
+
+(app) {
+	encode zstd gzip
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+# Marketing, creator app, platform admin and every school subdomain: one wildcard certificate.
+{$ROOT_DOMAIN}, *.{$ROOT_DOMAIN} {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+	import app
+}
+
+# Custom school domains: certificate issued on first request after the ask check passes.
+https:// {
+	tls {
+		on_demand
+	}
+	import app
+}

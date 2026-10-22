@@ -1,0 +1,15 @@
+# Backend
+backend/bin/
+backend/.env
+*.test
+coverage.out
+
+# Web (web/.gitignore covers the rest)
+web/.env.local
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

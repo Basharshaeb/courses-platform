@@ -1,0 +1,69 @@
+{
+  "common": {
+    "brand": "Teatchable",
+    "language": "English",
+    "logout": "تسجيل الخروج",
+    "loading": "جارٍ التحميل…",
+    "notFound": "الصفحة غير موجودة",
+    "backHome": "العودة للرئيسية"
+  },
+  "marketing": {
+    "title": "أطلق أكاديميتك الإلكترونية",
+    "subtitle": "أنشئ الدورات، بِعها بمدى وApple Pay، وتابع طلابك من مكان واحد.",
+    "cta": "ابدأ مجانًا",
+    "login": "دخول صنّاع المحتوى"
+  },
+  "auth": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "name": "الاسم",
+    "schoolName": "اسم الأكاديمية",
+    "subdomain": "رابط الأكاديمية",
+    "subdomainHint": "أحرف إنجليزية صغيرة وأرقام وشرطات",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "creatorLoginTitle": "دخول صنّاع المحتوى",
+    "creatorSignupTitle": "أنشئ أكاديميتك",
+    "studentLoginTitle": "تسجيل الدخول",
+    "studentSignupTitle": "إنشاء حساب طالب",
+    "noAccount": "ليس لديك حساب؟",
+    "haveAccount": "لديك حساب بالفعل؟",
+    "submitting": "جارٍ الإرسال…"
+  },
+  "errors": {
+    "email_taken": "هذا البريد مسجّل مسبقًا.",
+    "subdomain_taken": "هذا الرابط مستخدم، اختر رابطًا آخر.",
+    "invalid_subdomain": "الرابط يجب أن يكون من 3 إلى 32 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة.",
+    "invalid_request": "تحقق من الحقول المدخلة.",
+    "unauthorized": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "forbidden": "هذا الحساب موقوف.",
+    "generic": "حدث خطأ غير متوقع، حاول مرة أخرى."
+  },
+  "dashboard": {
+    "welcome": "مرحبًا {name}",
+    "yourSchools": "أكاديمياتك",
+    "visit": "زيارة الموقع",
+    "role": {
+      "owner": "مالك",
+      "admin": "مدير",
+      "author": "مؤلف",
+      "support": "دعم",
+      "finance": "مالية"
+    },
+    "nextSteps": "الخطوة التالية: إنشاء الدورات (المرحلة الأولى)."
+  },
+  "school": {
+    "login": "دخول",
+    "signup": "إنشاء حساب",
+    "library": "دوراتي",
+    "heroTitle": "مرحبًا بك في {name}",
+    "heroSubtitle": "الدورات قادمة قريبًا.",
+    "libraryTitle": "دوراتي",
+    "libraryEmpty": "لم تلتحق بأي دورة بعد.",
+    "greeting": "أهلًا {name}"
+  },
+  "platform": {
+    "title": "لوحة إدارة المنصة",
+    "comingSoon": "قريبًا: إدارة الأكاديميات والخطط والرسوم."
+  }
+}
