@@ -22,6 +22,192 @@ type Account struct {
 	UpdatedAt       time.Time
 }
 
+type Course struct {
+	ID              uuid.UUID
+	SchoolID        uuid.UUID
+	Slug            string
+	Title           string
+	Subtitle        string
+	Description     string
+	CoverKey        *string
+	Locale          string
+	Status          string
+	AuthorAccountID *uuid.UUID
+	Settings        []byte
+	PublishedAt     *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+type CourseSection struct {
+	ID        uuid.UUID
+	SchoolID  uuid.UUID
+	CourseID  uuid.UUID
+	Position  int32
+	Title     string
+	DripType  string
+	DripDays  *int32
+	DripDate  *time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Enrollment struct {
+	ID          uuid.UUID
+	SchoolID    uuid.UUID
+	StudentID   uuid.UUID
+	CourseID    uuid.UUID
+	Source      string
+	SourceID    *uuid.UUID
+	Status      string
+	EnrolledAt  time.Time
+	CompletedAt *time.Time
+	ProgressPct int32
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type GatewayConnection struct {
+	ID                   uuid.UUID
+	SchoolID             uuid.UUID
+	Gateway              string
+	Mode                 string
+	CredentialsEncrypted []byte
+	PublishableKey       string
+	Status               string
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+}
+
+type InboundWebhookEvent struct {
+	ID          uuid.UUID
+	Gateway     string
+	EventID     string
+	Payload     []byte
+	ProcessedAt *time.Time
+	Error       *string
+	CreatedAt   time.Time
+}
+
+type Lecture struct {
+	ID            uuid.UUID
+	SchoolID      uuid.UUID
+	CourseID      uuid.UUID
+	SectionID     uuid.UUID
+	Position      int32
+	Title         string
+	IsFreePreview bool
+	Status        string
+	DurationSec   *int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+type LectureBlock struct {
+	ID           uuid.UUID
+	SchoolID     uuid.UUID
+	LectureID    uuid.UUID
+	Position     int32
+	Kind         string
+	Data         []byte
+	MediaAssetID *uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type LectureProgress struct {
+	EnrollmentID uuid.UUID
+	SchoolID     uuid.UUID
+	LectureID    uuid.UUID
+	IsCompleted  bool
+	PositionSec  int32
+	UpdatedAt    time.Time
+}
+
+type MediaAsset struct {
+	ID           uuid.UUID
+	SchoolID     uuid.UUID
+	Provider     string
+	ProviderRef  string
+	Kind         string
+	Status       string
+	Filename     string
+	SizeBytes    *int64
+	DurationSec  *int32
+	ThumbnailUrl *string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type Order struct {
+	ID              uuid.UUID
+	SchoolID        uuid.UUID
+	StudentID       uuid.UUID
+	Status          string
+	Subtotal        int64
+	Discount        int64
+	Tax             int64
+	Total           int64
+	Currency        string
+	Gateway         string
+	GatewayOrderRef *string
+	BuyerName       string
+	BuyerEmail      string
+	IdempotencyKey  *string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+type OrderItem struct {
+	ID            uuid.UUID
+	SchoolID      uuid.UUID
+	OrderID       uuid.UUID
+	ProductID     uuid.UUID
+	PricingPlanID uuid.UUID
+	Amount        int64
+	Tax           int64
+	CreatedAt     time.Time
+}
+
+type Payment struct {
+	ID               uuid.UUID
+	SchoolID         uuid.UUID
+	OrderID          uuid.UUID
+	Gateway          string
+	GatewayPaymentID *string
+	Amount           int64
+	Currency         string
+	Status           string
+	FailureCode      *string
+	RawResponse      []byte
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+}
+
+type PricingPlan struct {
+	ID           uuid.UUID
+	SchoolID     uuid.UUID
+	ProductID    uuid.UUID
+	Type         string
+	Amount       int64
+	Currency     string
+	TaxInclusive bool
+	Active       bool
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+type Product struct {
+	ID        uuid.UUID
+	SchoolID  uuid.UUID
+	Kind      string
+	RefID     uuid.UUID
+	Name      string
+	Status    string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type School struct {
 	ID             uuid.UUID
 	OwnerAccountID uuid.UUID

@@ -24,6 +24,7 @@ func Unauthorized(detail string) *Error     { return New(http.StatusUnauthorized
 func Forbidden(detail string) *Error        { return New(http.StatusForbidden, "forbidden", detail) }
 func NotFound(code, detail string) *Error   { return New(http.StatusNotFound, code, detail) }
 func Conflict(code, detail string) *Error   { return New(http.StatusConflict, code, detail) }
+func Validation(code, detail string) *Error { return BadRequest(code, detail) }
 
 // As extracts an *Error from err.
 func As(err error) (*Error, bool) {

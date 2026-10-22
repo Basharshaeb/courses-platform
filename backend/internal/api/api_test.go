@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/teatchable/backend/internal/api"
+	"github.com/teatchable/backend/internal/modules/catalog"
 	"github.com/teatchable/backend/internal/modules/identity"
 	"github.com/teatchable/backend/internal/modules/school"
 	"github.com/teatchable/backend/internal/platform/config"
@@ -22,7 +23,10 @@ import (
 	"github.com/teatchable/backend/internal/testutil/pgtest"
 )
 
-var srv *httptest.Server
+var (
+	srv   *httptest.Server
+	pgEnv *pgtest.Env // owner access for test setup that has no API yet
+)
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -35,6 +39,7 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	pgEnv = env
 	cfg := config.Config{
 		RootDomain: "localhost", AppHost: "app.localhost", AdminHost: "admin.localhost",
 		TrustProxy: true, SessionTTL: time.Hour,
@@ -47,6 +52,7 @@ func TestMain(m *testing.M) {
 		Resolver: tenant.NewResolver(env.AppPool, tenant.Hosts{RootDomain: cfg.RootDomain, AppHost: cfg.AppHost, AdminHost: cfg.AdminHost}, 0),
 		Identity: identity.NewService(env.AppPool, schools, cfg.SessionTTL),
 		Schools:  schools,
+		Catalog:  catalog.NewService(env.AppPool),
 	})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -61,7 +67,8 @@ func TestMain(m *testing.M) {
 
 type response struct {
 	status int
-	body   map[string]any
+	body   map[string]any // JSON object responses
+	list   []any          // JSON array responses
 	cookie *http.Cookie
 }
 
@@ -90,8 +97,15 @@ func call(t *testing.T, method, host, path, body string, cookie *http.Cookie, or
 	out := response{status: res.StatusCode}
 	raw, _ := io.ReadAll(res.Body)
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &out.body); err != nil {
+		var v any
+		if err := json.Unmarshal(raw, &v); err != nil {
 			t.Fatalf("decode %s: %v", raw, err)
+		}
+		switch v := v.(type) {
+		case map[string]any:
+			out.body = v
+		case []any:
+			out.list = v
 		}
 	}
 	for _, c := range res.Cookies() {

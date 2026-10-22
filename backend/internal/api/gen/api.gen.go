@@ -23,6 +23,69 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for BlockKind.
+const (
+	Embed BlockKind = "embed"
+	Pdf   BlockKind = "pdf"
+	Text  BlockKind = "text"
+	Video BlockKind = "video"
+)
+
+// Valid indicates whether the value is a known member of the BlockKind enum.
+func (e BlockKind) Valid() bool {
+	switch e {
+	case Embed:
+		return true
+	case Pdf:
+		return true
+	case Text:
+		return true
+	case Video:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CourseStatus.
+const (
+	CourseStatusArchived  CourseStatus = "archived"
+	CourseStatusDraft     CourseStatus = "draft"
+	CourseStatusPublished CourseStatus = "published"
+)
+
+// Valid indicates whether the value is a known member of the CourseStatus enum.
+func (e CourseStatus) Valid() bool {
+	switch e {
+	case CourseStatusArchived:
+		return true
+	case CourseStatusDraft:
+		return true
+	case CourseStatusPublished:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LectureStatus.
+const (
+	LectureStatusDraft     LectureStatus = "draft"
+	LectureStatusPublished LectureStatus = "published"
+)
+
+// Valid indicates whether the value is a known member of the LectureStatus enum.
+func (e LectureStatus) Valid() bool {
+	switch e {
+	case LectureStatusDraft:
+		return true
+	case LectureStatusPublished:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for Locale.
 const (
 	Ar Locale = "ar"
@@ -95,8 +158,131 @@ type AccountSignupRequest struct {
 	Subdomain string `json:"subdomain"`
 }
 
+// Block defines model for Block.
+type Block struct {
+	// Data Content of a block; which fields apply depends on the kind:
+	// `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+	// `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+	Data         BlockData           `json:"data"`
+	Id           openapi_types.UUID  `json:"id"`
+	Kind         BlockKind           `json:"kind"`
+	MediaAssetId *openapi_types.UUID `json:"mediaAssetId,omitempty"`
+	Position     int                 `json:"position"`
+}
+
+// BlockData Content of a block; which fields apply depends on the kind:
+// `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+// `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+type BlockData struct {
+	FileKey  *string `json:"fileKey,omitempty"`
+	Filename *string `json:"filename,omitempty"`
+	Html     *string `json:"html,omitempty"`
+	Url      *string `json:"url,omitempty"`
+}
+
+// BlockKind defines model for BlockKind.
+type BlockKind string
+
+// BlockOrder defines model for BlockOrder.
+type BlockOrder struct {
+	BlockIds []openapi_types.UUID `json:"blockIds"`
+}
+
+// Course defines model for Course.
+type Course struct {
+	CreatedAt   time.Time          `json:"createdAt"`
+	Description string             `json:"description"`
+	Id          openapi_types.UUID `json:"id"`
+	Locale      Locale             `json:"locale"`
+	PublishedAt *time.Time         `json:"publishedAt,omitempty"`
+	Slug        string             `json:"slug"`
+	Status      CourseStatus       `json:"status"`
+	Subtitle    string             `json:"subtitle"`
+	Title       string             `json:"title"`
+	UpdatedAt   time.Time          `json:"updatedAt"`
+}
+
+// CourseDetail defines model for CourseDetail.
+type CourseDetail struct {
+	Course   Course    `json:"course"`
+	Sections []Section `json:"sections"`
+}
+
+// CourseStatus defines model for CourseStatus.
+type CourseStatus string
+
+// CourseSummary defines model for CourseSummary.
+type CourseSummary struct {
+	Id           openapi_types.UUID `json:"id"`
+	LectureCount int                `json:"lectureCount"`
+	PublishedAt  *time.Time         `json:"publishedAt,omitempty"`
+	SectionCount int                `json:"sectionCount"`
+	Slug         string             `json:"slug"`
+	Status       CourseStatus       `json:"status"`
+	Title        string             `json:"title"`
+	UpdatedAt    time.Time          `json:"updatedAt"`
+}
+
+// CourseTitle defines model for CourseTitle.
+type CourseTitle = string
+
+// CreateBlockRequest defines model for CreateBlockRequest.
+type CreateBlockRequest struct {
+	// Data Content of a block; which fields apply depends on the kind:
+	// `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+	// `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+	Data *BlockData `json:"data,omitempty"`
+	Kind BlockKind  `json:"kind"`
+}
+
+// CreateCourseRequest defines model for CreateCourseRequest.
+type CreateCourseRequest struct {
+	Description *string `json:"description,omitempty"`
+	Locale      *Locale `json:"locale,omitempty"`
+
+	// Slug URL name, lower-case letters, digits and single dashes, e.g. `intro-to-go`
+	Slug     *Slug       `json:"slug,omitempty"`
+	Subtitle *string     `json:"subtitle,omitempty"`
+	Title    CourseTitle `json:"title"`
+}
+
+// CreateLectureRequest defines model for CreateLectureRequest.
+type CreateLectureRequest struct {
+	Title CourseTitle `json:"title"`
+}
+
+// Curriculum defines model for Curriculum.
+type Curriculum struct {
+	Sections []Section `json:"sections"`
+}
+
+// CurriculumOrder defines model for CurriculumOrder.
+type CurriculumOrder struct {
+	Sections []SectionOrder `json:"sections"`
+}
+
 // Email defines model for Email.
 type Email = openapi_types.Email
+
+// Lecture defines model for Lecture.
+type Lecture struct {
+	BlockCount    int                `json:"blockCount"`
+	Id            openapi_types.UUID `json:"id"`
+	IsFreePreview bool               `json:"isFreePreview"`
+	Position      int                `json:"position"`
+	SectionId     openapi_types.UUID `json:"sectionId"`
+	Status        LectureStatus      `json:"status"`
+	Title         string             `json:"title"`
+}
+
+// LectureDetail defines model for LectureDetail.
+type LectureDetail struct {
+	Blocks  []Block `json:"blocks"`
+	Lecture Lecture `json:"lecture"`
+}
+
+// LectureStatus defines model for LectureStatus.
+type LectureStatus string
 
 // Locale defines model for Locale.
 type Locale string
@@ -142,6 +328,65 @@ type SchoolMembership struct {
 // SchoolMembershipRole defines model for SchoolMembership.Role.
 type SchoolMembershipRole string
 
+// Section defines model for Section.
+type Section struct {
+	Id       openapi_types.UUID `json:"id"`
+	Lectures []Lecture          `json:"lectures"`
+	Position int                `json:"position"`
+	Title    string             `json:"title"`
+}
+
+// SectionInput defines model for SectionInput.
+type SectionInput struct {
+	Title CourseTitle `json:"title"`
+}
+
+// SectionOrder defines model for SectionOrder.
+type SectionOrder struct {
+	Id         openapi_types.UUID   `json:"id"`
+	LectureIds []openapi_types.UUID `json:"lectureIds"`
+}
+
+// Slug URL name, lower-case letters, digits and single dashes, e.g. `intro-to-go`
+type Slug = string
+
+// StorefrontCourse defines model for StorefrontCourse.
+type StorefrontCourse struct {
+	Description string              `json:"description"`
+	Id          openapi_types.UUID  `json:"id"`
+	Locale      Locale              `json:"locale"`
+	Sections    []StorefrontSection `json:"sections"`
+	Slug        string              `json:"slug"`
+	Subtitle    string              `json:"subtitle"`
+	Title       string              `json:"title"`
+}
+
+// StorefrontCourseSummary defines model for StorefrontCourseSummary.
+type StorefrontCourseSummary struct {
+	Id           openapi_types.UUID `json:"id"`
+	LectureCount int                `json:"lectureCount"`
+	Locale       Locale             `json:"locale"`
+	PublishedAt  *time.Time         `json:"publishedAt,omitempty"`
+	Slug         string             `json:"slug"`
+	Subtitle     string             `json:"subtitle"`
+	Title        string             `json:"title"`
+}
+
+// StorefrontLecture defines model for StorefrontLecture.
+type StorefrontLecture struct {
+	DurationSec   *int               `json:"durationSec,omitempty"`
+	Id            openapi_types.UUID `json:"id"`
+	IsFreePreview bool               `json:"isFreePreview"`
+	Title         string             `json:"title"`
+}
+
+// StorefrontSection defines model for StorefrontSection.
+type StorefrontSection struct {
+	Id       openapi_types.UUID  `json:"id"`
+	Lectures []StorefrontLecture `json:"lectures"`
+	Title    string              `json:"title"`
+}
+
 // Student defines model for Student.
 type Student struct {
 	CreatedAt time.Time          `json:"createdAt"`
@@ -159,6 +404,47 @@ type StudentSignupRequest struct {
 	Password Password `json:"password"`
 }
 
+// UpdateBlockRequest defines model for UpdateBlockRequest.
+type UpdateBlockRequest struct {
+	// Data Content of a block; which fields apply depends on the kind:
+	// `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+	// `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+	Data BlockData `json:"data"`
+}
+
+// UpdateCourseRequest defines model for UpdateCourseRequest.
+type UpdateCourseRequest struct {
+	Description *string `json:"description,omitempty"`
+	Locale      *Locale `json:"locale,omitempty"`
+
+	// Slug URL name, lower-case letters, digits and single dashes, e.g. `intro-to-go`
+	Slug     *Slug        `json:"slug,omitempty"`
+	Subtitle *string      `json:"subtitle,omitempty"`
+	Title    *CourseTitle `json:"title,omitempty"`
+}
+
+// UpdateLectureRequest defines model for UpdateLectureRequest.
+type UpdateLectureRequest struct {
+	IsFreePreview *bool          `json:"isFreePreview,omitempty"`
+	Status        *LectureStatus `json:"status,omitempty"`
+	Title         *CourseTitle   `json:"title,omitempty"`
+}
+
+// BlockId defines model for BlockId.
+type BlockId = openapi_types.UUID
+
+// CourseId defines model for CourseId.
+type CourseId = openapi_types.UUID
+
+// LectureId defines model for LectureId.
+type LectureId = openapi_types.UUID
+
+// SchoolId defines model for SchoolId.
+type SchoolId = openapi_types.UUID
+
+// SectionId defines model for SectionId.
+type SectionId = openapi_types.UUID
+
 // CheckTLSAllowedParams defines parameters for CheckTLSAllowed.
 type CheckTLSAllowedParams struct {
 	Domain string `form:"domain" json:"domain"`
@@ -169,6 +455,36 @@ type LoginAccountJSONRequestBody = LoginRequest
 
 // SignupAccountJSONRequestBody defines body for SignupAccount for application/json ContentType.
 type SignupAccountJSONRequestBody = AccountSignupRequest
+
+// CreateCourseJSONRequestBody defines body for CreateCourse for application/json ContentType.
+type CreateCourseJSONRequestBody = CreateCourseRequest
+
+// UpdateCourseJSONRequestBody defines body for UpdateCourse for application/json ContentType.
+type UpdateCourseJSONRequestBody = UpdateCourseRequest
+
+// UpdateLectureJSONRequestBody defines body for UpdateLecture for application/json ContentType.
+type UpdateLectureJSONRequestBody = UpdateLectureRequest
+
+// CreateBlockJSONRequestBody defines body for CreateBlock for application/json ContentType.
+type CreateBlockJSONRequestBody = CreateBlockRequest
+
+// UpdateBlockJSONRequestBody defines body for UpdateBlock for application/json ContentType.
+type UpdateBlockJSONRequestBody = UpdateBlockRequest
+
+// ReorderBlocksJSONRequestBody defines body for ReorderBlocks for application/json ContentType.
+type ReorderBlocksJSONRequestBody = BlockOrder
+
+// ReorderCurriculumJSONRequestBody defines body for ReorderCurriculum for application/json ContentType.
+type ReorderCurriculumJSONRequestBody = CurriculumOrder
+
+// CreateSectionJSONRequestBody defines body for CreateSection for application/json ContentType.
+type CreateSectionJSONRequestBody = SectionInput
+
+// UpdateSectionJSONRequestBody defines body for UpdateSection for application/json ContentType.
+type UpdateSectionJSONRequestBody = SectionInput
+
+// CreateLectureJSONRequestBody defines body for CreateLecture for application/json ContentType.
+type CreateLectureJSONRequestBody = CreateLectureRequest
 
 // LoginStudentJSONRequestBody defines body for LoginStudent for application/json ContentType.
 type LoginStudentJSONRequestBody = LoginRequest
@@ -190,6 +506,63 @@ type ServerInterface interface {
 	// SignupAccount Create a creator account and its first school (app host)
 	// (POST /accounts/signup)
 	SignupAccount(w http.ResponseWriter, r *http.Request)
+	// ListCourses All courses of a school (any member)
+	// (GET /admin/schools/{schoolId}/courses)
+	ListCourses(w http.ResponseWriter, r *http.Request, schoolId SchoolId)
+	// CreateCourse Create a draft course (owner, admin, author)
+	// (POST /admin/schools/{schoolId}/courses)
+	CreateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId)
+	// DeleteCourse Delete a course with all its sections, lectures and blocks
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId})
+	DeleteCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+	// GetCourse A course with its curriculum (sections and lectures)
+	// (GET /admin/schools/{schoolId}/courses/{courseId})
+	GetCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId})
+	UpdateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	DeleteLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId)
+	// GetLecture A lecture with its content blocks
+	// (GET /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	GetLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	UpdateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId)
+	// CreateBlock Add a content block at the end of a lecture
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks)
+	CreateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId)
+
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+	DeleteBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+	UpdateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId)
+	// ReorderBlocks Set the order of a lecture's content blocks (every block exactly once)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder)
+	ReorderBlocks(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId)
+	// PublishCourse Publish a course on the school storefront (needs at least one published lecture)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/publish)
+	PublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+	// ReorderCurriculum Set the order of sections and of lectures (lectures may move between sections)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/reorder)
+	ReorderCurriculum(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+	// CreateSection Add a section at the end of the course
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/sections)
+	CreateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
+	// DeleteSection Delete a section with its lectures
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+	DeleteSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+	UpdateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId)
+	// CreateLecture Add a lecture at the end of a section
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures)
+	CreateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId)
+	// UnpublishCourse Move a course back to draft (hidden from the storefront)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/unpublish)
+	UnpublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId)
 
 	// (POST /auth/login)
 	LoginStudent(w http.ResponseWriter, r *http.Request)
@@ -205,6 +578,12 @@ type ServerInterface interface {
 
 	// (GET /me)
 	GetCurrentStudent(w http.ResponseWriter, r *http.Request)
+	// ListStorefrontCourses Published courses of the school served on the current host
+	// (GET /storefront/courses)
+	ListStorefrontCourses(w http.ResponseWriter, r *http.Request)
+	// GetStorefrontCourse A published course with its outline (published lectures only)
+	// (GET /storefront/courses/{slug})
+	GetStorefrontCourse(w http.ResponseWriter, r *http.Request, slug Slug)
 	// GetStorefrontSchool Public info for the school served on the current host
 	// (GET /storefront/school)
 	GetStorefrontSchool(w http.ResponseWriter, r *http.Request)
@@ -236,6 +615,114 @@ func (_ Unimplemented) SignupAccount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ListCourses All courses of a school (any member)
+// (GET /admin/schools/{schoolId}/courses)
+func (_ Unimplemented) ListCourses(w http.ResponseWriter, r *http.Request, schoolId SchoolId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateCourse Create a draft course (owner, admin, author)
+// (POST /admin/schools/{schoolId}/courses)
+func (_ Unimplemented) CreateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteCourse Delete a course with all its sections, lectures and blocks
+// (DELETE /admin/schools/{schoolId}/courses/{courseId})
+func (_ Unimplemented) DeleteCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetCourse A course with its curriculum (sections and lectures)
+// (GET /admin/schools/{schoolId}/courses/{courseId})
+func (_ Unimplemented) GetCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (PATCH /admin/schools/{schoolId}/courses/{courseId})
+func (_ Unimplemented) UpdateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+func (_ Unimplemented) DeleteLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetLecture A lecture with its content blocks
+// (GET /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+func (_ Unimplemented) GetLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+func (_ Unimplemented) UpdateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateBlock Add a content block at the end of a lecture
+// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks)
+func (_ Unimplemented) CreateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+func (_ Unimplemented) DeleteBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+func (_ Unimplemented) UpdateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ReorderBlocks Set the order of a lecture's content blocks (every block exactly once)
+// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder)
+func (_ Unimplemented) ReorderBlocks(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// PublishCourse Publish a course on the school storefront (needs at least one published lecture)
+// (POST /admin/schools/{schoolId}/courses/{courseId}/publish)
+func (_ Unimplemented) PublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ReorderCurriculum Set the order of sections and of lectures (lectures may move between sections)
+// (POST /admin/schools/{schoolId}/courses/{courseId}/reorder)
+func (_ Unimplemented) ReorderCurriculum(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateSection Add a section at the end of the course
+// (POST /admin/schools/{schoolId}/courses/{courseId}/sections)
+func (_ Unimplemented) CreateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteSection Delete a section with its lectures
+// (DELETE /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+func (_ Unimplemented) DeleteSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// (PATCH /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+func (_ Unimplemented) UpdateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateLecture Add a lecture at the end of a section
+// (POST /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures)
+func (_ Unimplemented) CreateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UnpublishCourse Move a course back to draft (hidden from the storefront)
+// (POST /admin/schools/{schoolId}/courses/{courseId}/unpublish)
+func (_ Unimplemented) UnpublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // (POST /auth/login)
 func (_ Unimplemented) LoginStudent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -260,6 +747,18 @@ func (_ Unimplemented) CheckTLSAllowed(w http.ResponseWriter, r *http.Request, p
 
 // (GET /me)
 func (_ Unimplemented) GetCurrentStudent(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListStorefrontCourses Published courses of the school served on the current host
+// (GET /storefront/courses)
+func (_ Unimplemented) ListStorefrontCourses(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetStorefrontCourse A published course with its outline (published lectures only)
+// (GET /storefront/courses/{slug})
+func (_ Unimplemented) GetStorefrontCourse(w http.ResponseWriter, r *http.Request, slug Slug) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -325,6 +824,761 @@ func (siw *ServerInterfaceWrapper) SignupAccount(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.SignupAccount(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListCourses operation middleware
+func (siw *ServerInterfaceWrapper) ListCourses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListCourses(w, r, schoolId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateCourse operation middleware
+func (siw *ServerInterfaceWrapper) CreateCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateCourse(w, r, schoolId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteCourse operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCourse(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCourse operation middleware
+func (siw *ServerInterfaceWrapper) GetCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCourse(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateCourse operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCourse(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteLecture operation middleware
+func (siw *ServerInterfaceWrapper) DeleteLecture(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteLecture(w, r, schoolId, courseId, lectureId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetLecture operation middleware
+func (siw *ServerInterfaceWrapper) GetLecture(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetLecture(w, r, schoolId, courseId, lectureId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateLecture operation middleware
+func (siw *ServerInterfaceWrapper) UpdateLecture(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateLecture(w, r, schoolId, courseId, lectureId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateBlock operation middleware
+func (siw *ServerInterfaceWrapper) CreateBlock(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateBlock(w, r, schoolId, courseId, lectureId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteBlock operation middleware
+func (siw *ServerInterfaceWrapper) DeleteBlock(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "blockId" -------------
+	var blockId BlockId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "blockId", chi.URLParam(r, "blockId"), &blockId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "blockId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteBlock(w, r, schoolId, courseId, lectureId, blockId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateBlock operation middleware
+func (siw *ServerInterfaceWrapper) UpdateBlock(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "blockId" -------------
+	var blockId BlockId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "blockId", chi.URLParam(r, "blockId"), &blockId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "blockId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateBlock(w, r, schoolId, courseId, lectureId, blockId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReorderBlocks operation middleware
+func (siw *ServerInterfaceWrapper) ReorderBlocks(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "lectureId" -------------
+	var lectureId LectureId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "lectureId", chi.URLParam(r, "lectureId"), &lectureId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "lectureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReorderBlocks(w, r, schoolId, courseId, lectureId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PublishCourse operation middleware
+func (siw *ServerInterfaceWrapper) PublishCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PublishCourse(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ReorderCurriculum operation middleware
+func (siw *ServerInterfaceWrapper) ReorderCurriculum(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ReorderCurriculum(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateSection operation middleware
+func (siw *ServerInterfaceWrapper) CreateSection(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateSection(w, r, schoolId, courseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteSection operation middleware
+func (siw *ServerInterfaceWrapper) DeleteSection(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "sectionId" -------------
+	var sectionId SectionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sectionId", chi.URLParam(r, "sectionId"), &sectionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sectionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteSection(w, r, schoolId, courseId, sectionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateSection operation middleware
+func (siw *ServerInterfaceWrapper) UpdateSection(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "sectionId" -------------
+	var sectionId SectionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sectionId", chi.URLParam(r, "sectionId"), &sectionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sectionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateSection(w, r, schoolId, courseId, sectionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateLecture operation middleware
+func (siw *ServerInterfaceWrapper) CreateLecture(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "sectionId" -------------
+	var sectionId SectionId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sectionId", chi.URLParam(r, "sectionId"), &sectionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sectionId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateLecture(w, r, schoolId, courseId, sectionId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UnpublishCourse operation middleware
+func (siw *ServerInterfaceWrapper) UnpublishCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "schoolId" -------------
+	var schoolId SchoolId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "schoolId", chi.URLParam(r, "schoolId"), &schoolId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "schoolId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "courseId" -------------
+	var courseId CourseId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "courseId", chi.URLParam(r, "courseId"), &courseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "courseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UnpublishCourse(w, r, schoolId, courseId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -414,6 +1668,46 @@ func (siw *ServerInterfaceWrapper) GetCurrentStudent(w http.ResponseWriter, r *h
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCurrentStudent(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListStorefrontCourses operation middleware
+func (siw *ServerInterfaceWrapper) ListStorefrontCourses(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListStorefrontCourses(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetStorefrontCourse operation middleware
+func (siw *ServerInterfaceWrapper) GetStorefrontCourse(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "slug" -------------
+	var slug Slug
+
+	err = runtime.BindStyledParameterWithOptions("simple", "slug", chi.URLParam(r, "slug"), &slug, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "slug", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStorefrontCourse(w, r, slug)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -552,6 +1846,69 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/storefront/school", wrapper.GetStorefrontSchool)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/storefront/courses", wrapper.ListStorefrontCourses)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/storefront/courses/{slug}", wrapper.GetStorefrontCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/admin/schools/{schoolId}/courses", wrapper.ListCourses)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses", wrapper.CreateCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}", wrapper.DeleteCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}", wrapper.GetCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}", wrapper.UpdateCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/publish", wrapper.PublishCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/unpublish", wrapper.UnpublishCourse)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/reorder", wrapper.ReorderCurriculum)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/sections", wrapper.CreateSection)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}", wrapper.DeleteSection)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}", wrapper.UpdateSection)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures", wrapper.CreateLecture)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}", wrapper.DeleteLecture)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}", wrapper.GetLecture)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}", wrapper.UpdateLecture)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder", wrapper.ReorderBlocks)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks", wrapper.CreateBlock)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId}", wrapper.DeleteBlock)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId}", wrapper.UpdateBlock)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/accounts/signup", wrapper.SignupAccount)
@@ -751,6 +2108,762 @@ type SignupAccountdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response SignupAccountdefaultApplicationProblemPlusJSONResponse) VisitSignupAccountResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCoursesRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+}
+
+type ListCoursesResponseObject interface {
+	VisitListCoursesResponse(w http.ResponseWriter) error
+}
+
+type ListCourses200JSONResponse []CourseSummary
+
+func (response ListCourses200JSONResponse) VisitListCoursesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCoursesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListCoursesdefaultApplicationProblemPlusJSONResponse) VisitListCoursesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	Body     *CreateCourseJSONRequestBody
+}
+
+type CreateCourseResponseObject interface {
+	VisitCreateCourseResponse(w http.ResponseWriter) error
+}
+
+type CreateCourse201JSONResponse Course
+
+func (response CreateCourse201JSONResponse) VisitCreateCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateCoursedefaultApplicationProblemPlusJSONResponse) VisitCreateCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+}
+
+type DeleteCourseResponseObject interface {
+	VisitDeleteCourseResponse(w http.ResponseWriter) error
+}
+
+type DeleteCourse204Response struct {
+}
+
+func (response DeleteCourse204Response) VisitDeleteCourseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteCoursedefaultApplicationProblemPlusJSONResponse) VisitDeleteCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+}
+
+type GetCourseResponseObject interface {
+	VisitGetCourseResponse(w http.ResponseWriter) error
+}
+
+type GetCourse200JSONResponse CourseDetail
+
+func (response GetCourse200JSONResponse) VisitGetCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetCoursedefaultApplicationProblemPlusJSONResponse) VisitGetCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+	Body     *UpdateCourseJSONRequestBody
+}
+
+type UpdateCourseResponseObject interface {
+	VisitUpdateCourseResponse(w http.ResponseWriter) error
+}
+
+type UpdateCourse200JSONResponse Course
+
+func (response UpdateCourse200JSONResponse) VisitUpdateCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCoursedefaultApplicationProblemPlusJSONResponse) VisitUpdateCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteLectureRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+}
+
+type DeleteLectureResponseObject interface {
+	VisitDeleteLectureResponse(w http.ResponseWriter) error
+}
+
+type DeleteLecture204Response struct {
+}
+
+func (response DeleteLecture204Response) VisitDeleteLectureResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteLecturedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteLecturedefaultApplicationProblemPlusJSONResponse) VisitDeleteLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetLectureRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+}
+
+type GetLectureResponseObject interface {
+	VisitGetLectureResponse(w http.ResponseWriter) error
+}
+
+type GetLecture200JSONResponse LectureDetail
+
+func (response GetLecture200JSONResponse) VisitGetLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetLecturedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetLecturedefaultApplicationProblemPlusJSONResponse) VisitGetLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateLectureRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+	Body      *UpdateLectureJSONRequestBody
+}
+
+type UpdateLectureResponseObject interface {
+	VisitUpdateLectureResponse(w http.ResponseWriter) error
+}
+
+type UpdateLecture200JSONResponse Lecture
+
+func (response UpdateLecture200JSONResponse) VisitUpdateLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateLecturedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateLecturedefaultApplicationProblemPlusJSONResponse) VisitUpdateLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateBlockRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+	Body      *CreateBlockJSONRequestBody
+}
+
+type CreateBlockResponseObject interface {
+	VisitCreateBlockResponse(w http.ResponseWriter) error
+}
+
+type CreateBlock201JSONResponse Block
+
+func (response CreateBlock201JSONResponse) VisitCreateBlockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateBlockdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateBlockdefaultApplicationProblemPlusJSONResponse) VisitCreateBlockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteBlockRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+	BlockId   BlockId   `json:"blockId"`
+}
+
+type DeleteBlockResponseObject interface {
+	VisitDeleteBlockResponse(w http.ResponseWriter) error
+}
+
+type DeleteBlock204Response struct {
+}
+
+func (response DeleteBlock204Response) VisitDeleteBlockResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteBlockdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteBlockdefaultApplicationProblemPlusJSONResponse) VisitDeleteBlockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateBlockRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+	BlockId   BlockId   `json:"blockId"`
+	Body      *UpdateBlockJSONRequestBody
+}
+
+type UpdateBlockResponseObject interface {
+	VisitUpdateBlockResponse(w http.ResponseWriter) error
+}
+
+type UpdateBlock200JSONResponse Block
+
+func (response UpdateBlock200JSONResponse) VisitUpdateBlockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateBlockdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateBlockdefaultApplicationProblemPlusJSONResponse) VisitUpdateBlockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ReorderBlocksRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	LectureId LectureId `json:"lectureId"`
+	Body      *ReorderBlocksJSONRequestBody
+}
+
+type ReorderBlocksResponseObject interface {
+	VisitReorderBlocksResponse(w http.ResponseWriter) error
+}
+
+type ReorderBlocks200JSONResponse []Block
+
+func (response ReorderBlocks200JSONResponse) VisitReorderBlocksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ReorderBlocksdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ReorderBlocksdefaultApplicationProblemPlusJSONResponse) VisitReorderBlocksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PublishCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+}
+
+type PublishCourseResponseObject interface {
+	VisitPublishCourseResponse(w http.ResponseWriter) error
+}
+
+type PublishCourse200JSONResponse Course
+
+func (response PublishCourse200JSONResponse) VisitPublishCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type PublishCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response PublishCoursedefaultApplicationProblemPlusJSONResponse) VisitPublishCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ReorderCurriculumRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+	Body     *ReorderCurriculumJSONRequestBody
+}
+
+type ReorderCurriculumResponseObject interface {
+	VisitReorderCurriculumResponse(w http.ResponseWriter) error
+}
+
+type ReorderCurriculum200JSONResponse Curriculum
+
+func (response ReorderCurriculum200JSONResponse) VisitReorderCurriculumResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ReorderCurriculumdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ReorderCurriculumdefaultApplicationProblemPlusJSONResponse) VisitReorderCurriculumResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateSectionRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+	Body     *CreateSectionJSONRequestBody
+}
+
+type CreateSectionResponseObject interface {
+	VisitCreateSectionResponse(w http.ResponseWriter) error
+}
+
+type CreateSection201JSONResponse Section
+
+func (response CreateSection201JSONResponse) VisitCreateSectionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateSectiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateSectiondefaultApplicationProblemPlusJSONResponse) VisitCreateSectionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteSectionRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	SectionId SectionId `json:"sectionId"`
+}
+
+type DeleteSectionResponseObject interface {
+	VisitDeleteSectionResponse(w http.ResponseWriter) error
+}
+
+type DeleteSection204Response struct {
+}
+
+func (response DeleteSection204Response) VisitDeleteSectionResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteSectiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteSectiondefaultApplicationProblemPlusJSONResponse) VisitDeleteSectionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateSectionRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	SectionId SectionId `json:"sectionId"`
+	Body      *UpdateSectionJSONRequestBody
+}
+
+type UpdateSectionResponseObject interface {
+	VisitUpdateSectionResponse(w http.ResponseWriter) error
+}
+
+type UpdateSection200JSONResponse Section
+
+func (response UpdateSection200JSONResponse) VisitUpdateSectionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateSectiondefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateSectiondefaultApplicationProblemPlusJSONResponse) VisitUpdateSectionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateLectureRequestObject struct {
+	SchoolId  SchoolId  `json:"schoolId"`
+	CourseId  CourseId  `json:"courseId"`
+	SectionId SectionId `json:"sectionId"`
+	Body      *CreateLectureJSONRequestBody
+}
+
+type CreateLectureResponseObject interface {
+	VisitCreateLectureResponse(w http.ResponseWriter) error
+}
+
+type CreateLecture201JSONResponse Lecture
+
+func (response CreateLecture201JSONResponse) VisitCreateLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateLecturedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateLecturedefaultApplicationProblemPlusJSONResponse) VisitCreateLectureResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UnpublishCourseRequestObject struct {
+	SchoolId SchoolId `json:"schoolId"`
+	CourseId CourseId `json:"courseId"`
+}
+
+type UnpublishCourseResponseObject interface {
+	VisitUnpublishCourseResponse(w http.ResponseWriter) error
+}
+
+type UnpublishCourse200JSONResponse Course
+
+func (response UnpublishCourse200JSONResponse) VisitUnpublishCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UnpublishCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UnpublishCoursedefaultApplicationProblemPlusJSONResponse) VisitUnpublishCourseResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -971,6 +3084,83 @@ func (response GetCurrentStudentdefaultApplicationProblemPlusJSONResponse) Visit
 	return err
 }
 
+type ListStorefrontCoursesRequestObject struct {
+}
+
+type ListStorefrontCoursesResponseObject interface {
+	VisitListStorefrontCoursesResponse(w http.ResponseWriter) error
+}
+
+type ListStorefrontCourses200JSONResponse []StorefrontCourseSummary
+
+func (response ListStorefrontCourses200JSONResponse) VisitListStorefrontCoursesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListStorefrontCoursesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListStorefrontCoursesdefaultApplicationProblemPlusJSONResponse) VisitListStorefrontCoursesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStorefrontCourseRequestObject struct {
+	Slug Slug `json:"slug"`
+}
+
+type GetStorefrontCourseResponseObject interface {
+	VisitGetStorefrontCourseResponse(w http.ResponseWriter) error
+}
+
+type GetStorefrontCourse200JSONResponse StorefrontCourse
+
+func (response GetStorefrontCourse200JSONResponse) VisitGetStorefrontCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStorefrontCoursedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetStorefrontCoursedefaultApplicationProblemPlusJSONResponse) VisitGetStorefrontCourseResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetStorefrontSchoolRequestObject struct {
 }
 
@@ -1023,6 +3213,63 @@ type StrictServerInterface interface {
 	// SignupAccount Create a creator account and its first school (app host)
 	// (POST /accounts/signup)
 	SignupAccount(ctx context.Context, request SignupAccountRequestObject) (SignupAccountResponseObject, error)
+	// ListCourses All courses of a school (any member)
+	// (GET /admin/schools/{schoolId}/courses)
+	ListCourses(ctx context.Context, request ListCoursesRequestObject) (ListCoursesResponseObject, error)
+	// CreateCourse Create a draft course (owner, admin, author)
+	// (POST /admin/schools/{schoolId}/courses)
+	CreateCourse(ctx context.Context, request CreateCourseRequestObject) (CreateCourseResponseObject, error)
+	// DeleteCourse Delete a course with all its sections, lectures and blocks
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId})
+	DeleteCourse(ctx context.Context, request DeleteCourseRequestObject) (DeleteCourseResponseObject, error)
+	// GetCourse A course with its curriculum (sections and lectures)
+	// (GET /admin/schools/{schoolId}/courses/{courseId})
+	GetCourse(ctx context.Context, request GetCourseRequestObject) (GetCourseResponseObject, error)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId})
+	UpdateCourse(ctx context.Context, request UpdateCourseRequestObject) (UpdateCourseResponseObject, error)
+
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	DeleteLecture(ctx context.Context, request DeleteLectureRequestObject) (DeleteLectureResponseObject, error)
+	// GetLecture A lecture with its content blocks
+	// (GET /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	GetLecture(ctx context.Context, request GetLectureRequestObject) (GetLectureResponseObject, error)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId})
+	UpdateLecture(ctx context.Context, request UpdateLectureRequestObject) (UpdateLectureResponseObject, error)
+	// CreateBlock Add a content block at the end of a lecture
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks)
+	CreateBlock(ctx context.Context, request CreateBlockRequestObject) (CreateBlockResponseObject, error)
+
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+	DeleteBlock(ctx context.Context, request DeleteBlockRequestObject) (DeleteBlockResponseObject, error)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId})
+	UpdateBlock(ctx context.Context, request UpdateBlockRequestObject) (UpdateBlockResponseObject, error)
+	// ReorderBlocks Set the order of a lecture's content blocks (every block exactly once)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder)
+	ReorderBlocks(ctx context.Context, request ReorderBlocksRequestObject) (ReorderBlocksResponseObject, error)
+	// PublishCourse Publish a course on the school storefront (needs at least one published lecture)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/publish)
+	PublishCourse(ctx context.Context, request PublishCourseRequestObject) (PublishCourseResponseObject, error)
+	// ReorderCurriculum Set the order of sections and of lectures (lectures may move between sections)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/reorder)
+	ReorderCurriculum(ctx context.Context, request ReorderCurriculumRequestObject) (ReorderCurriculumResponseObject, error)
+	// CreateSection Add a section at the end of the course
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/sections)
+	CreateSection(ctx context.Context, request CreateSectionRequestObject) (CreateSectionResponseObject, error)
+	// DeleteSection Delete a section with its lectures
+	// (DELETE /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+	DeleteSection(ctx context.Context, request DeleteSectionRequestObject) (DeleteSectionResponseObject, error)
+
+	// (PATCH /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId})
+	UpdateSection(ctx context.Context, request UpdateSectionRequestObject) (UpdateSectionResponseObject, error)
+	// CreateLecture Add a lecture at the end of a section
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures)
+	CreateLecture(ctx context.Context, request CreateLectureRequestObject) (CreateLectureResponseObject, error)
+	// UnpublishCourse Move a course back to draft (hidden from the storefront)
+	// (POST /admin/schools/{schoolId}/courses/{courseId}/unpublish)
+	UnpublishCourse(ctx context.Context, request UnpublishCourseRequestObject) (UnpublishCourseResponseObject, error)
 
 	// (POST /auth/login)
 	LoginStudent(ctx context.Context, request LoginStudentRequestObject) (LoginStudentResponseObject, error)
@@ -1038,6 +3285,12 @@ type StrictServerInterface interface {
 
 	// (GET /me)
 	GetCurrentStudent(ctx context.Context, request GetCurrentStudentRequestObject) (GetCurrentStudentResponseObject, error)
+	// ListStorefrontCourses Published courses of the school served on the current host
+	// (GET /storefront/courses)
+	ListStorefrontCourses(ctx context.Context, request ListStorefrontCoursesRequestObject) (ListStorefrontCoursesResponseObject, error)
+	// GetStorefrontCourse A published course with its outline (published lectures only)
+	// (GET /storefront/courses/{slug})
+	GetStorefrontCourse(ctx context.Context, request GetStorefrontCourseRequestObject) (GetStorefrontCourseResponseObject, error)
 	// GetStorefrontSchool Public info for the school served on the current host
 	// (GET /storefront/school)
 	GetStorefrontSchool(ctx context.Context, request GetStorefrontSchoolRequestObject) (GetStorefrontSchoolResponseObject, error)
@@ -1192,6 +3445,599 @@ func (sh *strictHandler) SignupAccount(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ListCourses operation middleware
+func (sh *strictHandler) ListCourses(w http.ResponseWriter, r *http.Request, schoolId SchoolId) {
+	var request ListCoursesRequestObject
+
+	request.SchoolId = schoolId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListCourses(ctx, request.(ListCoursesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListCourses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListCoursesResponseObject); ok {
+		if err := validResponse.VisitListCoursesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateCourse operation middleware
+func (sh *strictHandler) CreateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId) {
+	var request CreateCourseRequestObject
+
+	request.SchoolId = schoolId
+
+	var body CreateCourseJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateCourse(ctx, request.(CreateCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateCourseResponseObject); ok {
+		if err := validResponse.VisitCreateCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteCourse operation middleware
+func (sh *strictHandler) DeleteCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request DeleteCourseRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteCourse(ctx, request.(DeleteCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCourseResponseObject); ok {
+		if err := validResponse.VisitDeleteCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCourse operation middleware
+func (sh *strictHandler) GetCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request GetCourseRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCourse(ctx, request.(GetCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCourseResponseObject); ok {
+		if err := validResponse.VisitGetCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateCourse operation middleware
+func (sh *strictHandler) UpdateCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request UpdateCourseRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	var body UpdateCourseJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateCourse(ctx, request.(UpdateCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCourseResponseObject); ok {
+		if err := validResponse.VisitUpdateCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteLecture operation middleware
+func (sh *strictHandler) DeleteLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	var request DeleteLectureRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteLecture(ctx, request.(DeleteLectureRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteLecture")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteLectureResponseObject); ok {
+		if err := validResponse.VisitDeleteLectureResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetLecture operation middleware
+func (sh *strictHandler) GetLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	var request GetLectureRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetLecture(ctx, request.(GetLectureRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetLecture")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetLectureResponseObject); ok {
+		if err := validResponse.VisitGetLectureResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateLecture operation middleware
+func (sh *strictHandler) UpdateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	var request UpdateLectureRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+
+	var body UpdateLectureJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateLecture(ctx, request.(UpdateLectureRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateLecture")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateLectureResponseObject); ok {
+		if err := validResponse.VisitUpdateLectureResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateBlock operation middleware
+func (sh *strictHandler) CreateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	var request CreateBlockRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+
+	var body CreateBlockJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateBlock(ctx, request.(CreateBlockRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateBlock")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateBlockResponseObject); ok {
+		if err := validResponse.VisitCreateBlockResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteBlock operation middleware
+func (sh *strictHandler) DeleteBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId) {
+	var request DeleteBlockRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+	request.BlockId = blockId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteBlock(ctx, request.(DeleteBlockRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteBlock")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteBlockResponseObject); ok {
+		if err := validResponse.VisitDeleteBlockResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateBlock operation middleware
+func (sh *strictHandler) UpdateBlock(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId, blockId BlockId) {
+	var request UpdateBlockRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+	request.BlockId = blockId
+
+	var body UpdateBlockJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateBlock(ctx, request.(UpdateBlockRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateBlock")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateBlockResponseObject); ok {
+		if err := validResponse.VisitUpdateBlockResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ReorderBlocks operation middleware
+func (sh *strictHandler) ReorderBlocks(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, lectureId LectureId) {
+	var request ReorderBlocksRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.LectureId = lectureId
+
+	var body ReorderBlocksJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ReorderBlocks(ctx, request.(ReorderBlocksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ReorderBlocks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ReorderBlocksResponseObject); ok {
+		if err := validResponse.VisitReorderBlocksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PublishCourse operation middleware
+func (sh *strictHandler) PublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request PublishCourseRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PublishCourse(ctx, request.(PublishCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PublishCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PublishCourseResponseObject); ok {
+		if err := validResponse.VisitPublishCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ReorderCurriculum operation middleware
+func (sh *strictHandler) ReorderCurriculum(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request ReorderCurriculumRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	var body ReorderCurriculumJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ReorderCurriculum(ctx, request.(ReorderCurriculumRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ReorderCurriculum")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ReorderCurriculumResponseObject); ok {
+		if err := validResponse.VisitReorderCurriculumResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateSection operation middleware
+func (sh *strictHandler) CreateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request CreateSectionRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	var body CreateSectionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateSection(ctx, request.(CreateSectionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateSection")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateSectionResponseObject); ok {
+		if err := validResponse.VisitCreateSectionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteSection operation middleware
+func (sh *strictHandler) DeleteSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	var request DeleteSectionRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.SectionId = sectionId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteSection(ctx, request.(DeleteSectionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteSection")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteSectionResponseObject); ok {
+		if err := validResponse.VisitDeleteSectionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateSection operation middleware
+func (sh *strictHandler) UpdateSection(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	var request UpdateSectionRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.SectionId = sectionId
+
+	var body UpdateSectionJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateSection(ctx, request.(UpdateSectionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateSection")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateSectionResponseObject); ok {
+		if err := validResponse.VisitUpdateSectionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateLecture operation middleware
+func (sh *strictHandler) CreateLecture(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId, sectionId SectionId) {
+	var request CreateLectureRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+	request.SectionId = sectionId
+
+	var body CreateLectureJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateLecture(ctx, request.(CreateLectureRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateLecture")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateLectureResponseObject); ok {
+		if err := validResponse.VisitCreateLectureResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnpublishCourse operation middleware
+func (sh *strictHandler) UnpublishCourse(w http.ResponseWriter, r *http.Request, schoolId SchoolId, courseId CourseId) {
+	var request UnpublishCourseRequestObject
+
+	request.SchoolId = schoolId
+	request.CourseId = courseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UnpublishCourse(ctx, request.(UnpublishCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnpublishCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UnpublishCourseResponseObject); ok {
+		if err := validResponse.VisitUnpublishCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // LoginStudent operation middleware
 func (sh *strictHandler) LoginStudent(w http.ResponseWriter, r *http.Request) {
 	var request LoginStudentRequestObject
@@ -1328,6 +4174,56 @@ func (sh *strictHandler) GetCurrentStudent(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// ListStorefrontCourses operation middleware
+func (sh *strictHandler) ListStorefrontCourses(w http.ResponseWriter, r *http.Request) {
+	var request ListStorefrontCoursesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListStorefrontCourses(ctx, request.(ListStorefrontCoursesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListStorefrontCourses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListStorefrontCoursesResponseObject); ok {
+		if err := validResponse.VisitListStorefrontCoursesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetStorefrontCourse operation middleware
+func (sh *strictHandler) GetStorefrontCourse(w http.ResponseWriter, r *http.Request, slug Slug) {
+	var request GetStorefrontCourseRequestObject
+
+	request.Slug = slug
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStorefrontCourse(ctx, request.(GetStorefrontCourseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStorefrontCourse")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStorefrontCourseResponseObject); ok {
+		if err := validResponse.VisitGetStorefrontCourseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetStorefrontSchool operation middleware
 func (sh *strictHandler) GetStorefrontSchool(w http.ResponseWriter, r *http.Request) {
 	var request GetStorefrontSchoolRequestObject
@@ -1357,34 +4253,68 @@ func (sh *strictHandler) GetStorefrontSchool(w http.ResponseWriter, r *http.Requ
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"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",
-	"xM/H878HAA==",
+	"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",
+	"Cfae1a5rfbP+vwEA",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

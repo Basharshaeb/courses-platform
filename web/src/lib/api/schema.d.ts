@@ -21,6 +21,291 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storefront/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Published courses of the school served on the current host */
+        get: operations["listStorefrontCourses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storefront/courses/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A published course with its outline (published lectures only) */
+        get: operations["getStorefrontCourse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+            };
+            cookie?: never;
+        };
+        /** All courses of a school (any member) */
+        get: operations["listCourses"];
+        put?: never;
+        /** Create a draft course (owner, admin, author) */
+        post: operations["createCourse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        /** A course with its curriculum (sections and lectures) */
+        get: operations["getCourse"];
+        put?: never;
+        post?: never;
+        /** Delete a course with all its sections, lectures and blocks */
+        delete: operations["deleteCourse"];
+        options?: never;
+        head?: never;
+        patch: operations["updateCourse"];
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a course on the school storefront (needs at least one published lecture) */
+        post: operations["publishCourse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move a course back to draft (hidden from the storefront) */
+        post: operations["unpublishCourse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set the order of sections and of lectures (lectures may move between sections)
+         * @description The body lists every section of the course exactly once, each with every lecture that
+         *     should belong to it, in display order. Every lecture of the course must appear exactly once.
+         */
+        post: operations["reorderCurriculum"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/sections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a section at the end of the course */
+        post: operations["createSection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a section with its lectures */
+        delete: operations["deleteSection"];
+        options?: never;
+        head?: never;
+        patch: operations["updateSection"];
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a lecture at the end of a section */
+        post: operations["createLecture"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        /** A lecture with its content blocks */
+        get: operations["getLecture"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteLecture"];
+        options?: never;
+        head?: never;
+        patch: operations["updateLecture"];
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the order of a lecture's content blocks (every block exactly once) */
+        post: operations["reorderBlocks"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a content block at the end of a lecture */
+        post: operations["createBlock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+                blockId: components["parameters"]["BlockId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteBlock"];
+        options?: never;
+        head?: never;
+        patch: operations["updateBlock"];
+        trace?: never;
+    };
     "/accounts/signup": {
         parameters: {
             query?: never;
@@ -245,6 +530,170 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /** @description URL name, lower-case letters, digits and single dashes, e.g. `intro-to-go` */
+        Slug: string;
+        CourseTitle: string;
+        /** @enum {string} */
+        CourseStatus: "draft" | "published" | "archived";
+        /** @enum {string} */
+        LectureStatus: "draft" | "published";
+        Course: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            subtitle: string;
+            description: string;
+            locale: components["schemas"]["Locale"];
+            status: components["schemas"]["CourseStatus"];
+            /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CourseSummary: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            status: components["schemas"]["CourseStatus"];
+            sectionCount: number;
+            lectureCount: number;
+            /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateCourseRequest: {
+            title: components["schemas"]["CourseTitle"];
+            slug?: components["schemas"]["Slug"];
+            subtitle?: string;
+            description?: string;
+            locale?: components["schemas"]["Locale"];
+        };
+        UpdateCourseRequest: {
+            title?: components["schemas"]["CourseTitle"];
+            slug?: components["schemas"]["Slug"];
+            subtitle?: string;
+            description?: string;
+            locale?: components["schemas"]["Locale"];
+        };
+        CourseDetail: {
+            course: components["schemas"]["Course"];
+            sections: components["schemas"]["Section"][];
+        };
+        Curriculum: {
+            sections: components["schemas"]["Section"][];
+        };
+        CurriculumOrder: {
+            sections: components["schemas"]["SectionOrder"][];
+        };
+        SectionOrder: {
+            /** Format: uuid */
+            id: string;
+            lectureIds: string[];
+        };
+        Section: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            position: number;
+            lectures: components["schemas"]["Lecture"][];
+        };
+        SectionInput: {
+            title: components["schemas"]["CourseTitle"];
+        };
+        Lecture: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sectionId: string;
+            title: string;
+            position: number;
+            isFreePreview: boolean;
+            status: components["schemas"]["LectureStatus"];
+            blockCount: number;
+        };
+        CreateLectureRequest: {
+            title: components["schemas"]["CourseTitle"];
+        };
+        UpdateLectureRequest: {
+            title?: components["schemas"]["CourseTitle"];
+            isFreePreview?: boolean;
+            status?: components["schemas"]["LectureStatus"];
+        };
+        LectureDetail: {
+            lecture: components["schemas"]["Lecture"];
+            blocks: components["schemas"]["Block"][];
+        };
+        /** @enum {string} */
+        BlockKind: "text" | "pdf" | "video" | "embed";
+        /**
+         * @description Content of a block; which fields apply depends on the kind:
+         *     `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+         *     `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+         */
+        BlockData: {
+            html?: string;
+            url?: string;
+            fileKey?: string;
+            filename?: string;
+        };
+        Block: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["BlockKind"];
+            position: number;
+            data: components["schemas"]["BlockData"];
+            /** Format: uuid */
+            mediaAssetId?: string;
+        };
+        CreateBlockRequest: {
+            kind: components["schemas"]["BlockKind"];
+            data?: components["schemas"]["BlockData"];
+        };
+        UpdateBlockRequest: {
+            data: components["schemas"]["BlockData"];
+        };
+        BlockOrder: {
+            blockIds: string[];
+        };
+        StorefrontCourseSummary: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            subtitle: string;
+            locale: components["schemas"]["Locale"];
+            lectureCount: number;
+            /** Format: date-time */
+            publishedAt?: string;
+        };
+        StorefrontCourse: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: string;
+            subtitle: string;
+            description: string;
+            locale: components["schemas"]["Locale"];
+            sections: components["schemas"]["StorefrontSection"][];
+        };
+        StorefrontSection: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            lectures: components["schemas"]["StorefrontLecture"][];
+        };
+        StorefrontLecture: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            isFreePreview: boolean;
+            durationSec?: number;
+        };
     };
     responses: {
         /** @description Error (RFC 9457) */
@@ -257,7 +706,13 @@ export interface components {
             };
         };
     };
-    parameters: never;
+    parameters: {
+        SchoolId: string;
+        CourseId: string;
+        SectionId: string;
+        LectureId: string;
+        BlockId: string;
+    };
     requestBodies: never;
     headers: {
         /** @description Session cookie (`sid`, or `__Host-sid` when served over HTTPS) */
@@ -283,6 +738,548 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicSchool"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listStorefrontCourses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Courses, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCourseSummary"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getStorefrontCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: components["schemas"]["Slug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Course */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorefrontCourse"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listCourses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Courses, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSummary"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Course created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Course */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Course deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Course updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    publishCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Course published */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    unpublishCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Course is a draft again */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reorderCurriculum: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CurriculumOrder"];
+            };
+        };
+        responses: {
+            /** @description Curriculum in its new order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Curriculum"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createSection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SectionInput"];
+            };
+        };
+        responses: {
+            /** @description Section created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Section"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteSection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Section deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateSection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SectionInput"];
+            };
+        };
+        responses: {
+            /** @description Section updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Section"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createLecture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                sectionId: components["parameters"]["SectionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLectureRequest"];
+            };
+        };
+        responses: {
+            /** @description Lecture created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lecture"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getLecture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lecture */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LectureDetail"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteLecture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lecture deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateLecture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLectureRequest"];
+            };
+        };
+        responses: {
+            /** @description Lecture updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lecture"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    reorderBlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BlockOrder"];
+            };
+        };
+        responses: {
+            /** @description Blocks in their new order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Block"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createBlock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBlockRequest"];
+            };
+        };
+        responses: {
+            /** @description Block created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Block"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteBlock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+                blockId: components["parameters"]["BlockId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Block deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateBlock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                schoolId: components["parameters"]["SchoolId"];
+                courseId: components["parameters"]["CourseId"];
+                lectureId: components["parameters"]["LectureId"];
+                blockId: components["parameters"]["BlockId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBlockRequest"];
+            };
+        };
+        responses: {
+            /** @description Block updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Block"];
                 };
             };
             default: components["responses"]["Problem"];

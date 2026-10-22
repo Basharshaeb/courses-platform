@@ -67,6 +67,22 @@ func (q *Queries) CreateSchool(ctx context.Context, arg CreateSchoolParams) (Sch
 	return i, err
 }
 
+const getMemberRole = `-- name: GetMemberRole :one
+SELECT role FROM school_members WHERE school_id = $1 AND account_id = $2
+`
+
+type GetMemberRoleParams struct {
+	SchoolID  uuid.UUID
+	AccountID uuid.UUID
+}
+
+func (q *Queries) GetMemberRole(ctx context.Context, arg GetMemberRoleParams) (string, error) {
+	row := q.db.QueryRow(ctx, getMemberRole, arg.SchoolID, arg.AccountID)
+	var role string
+	err := row.Scan(&role)
+	return role, err
+}
+
 const getSchool = `-- name: GetSchool :one
 SELECT id, owner_account_id, name, subdomain, default_locale, currency, timezone, branding, settings, status, created_at, updated_at FROM schools WHERE id = $1
 `

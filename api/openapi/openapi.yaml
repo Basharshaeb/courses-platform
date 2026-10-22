@@ -7,7 +7,8 @@ info:
     host (see docs/adr/0003-same-origin-api.md):
 
     - `{school}.yourapp.com` / custom domains: storefront and student endpoints
-    - `app.yourapp.com`: creator (account) endpoints
+    - `app.yourapp.com`: creator (account) endpoints and `/admin/schools/{schoolId}/...` (requires
+      school membership; editing needs the owner, admin or author role)
     - any host: internal endpoints used by the edge proxy
 
     Errors use RFC 9457 `application/problem+json`.
@@ -16,6 +17,8 @@ servers:
 tags:
   - name: storefront
   - name: accounts
+  - name: catalog
+    description: Creator course builder, under /admin/schools/{schoolId} on the app host
   - name: students
   - name: internal
 
@@ -31,6 +34,372 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PublicSchool" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /storefront/courses:
+    get:
+      tags: [storefront]
+      operationId: listStorefrontCourses
+      summary: Published courses of the school served on the current host
+      responses:
+        "200":
+          description: Courses, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StorefrontCourseSummary" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /storefront/courses/{slug}:
+    get:
+      tags: [storefront]
+      operationId: getStorefrontCourse
+      summary: A published course with its outline (published lectures only)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Slug" }
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StorefrontCourse" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+    get:
+      tags: [catalog]
+      operationId: listCourses
+      summary: All courses of a school (any member)
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Courses, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CourseSummary" }
+        default: { $ref: "#/components/responses/Problem" }
+    post:
+      tags: [catalog]
+      operationId: createCourse
+      summary: Create a draft course (owner, admin, author)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCourseRequest" }
+      responses:
+        "201":
+          description: Course created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+    get:
+      tags: [catalog]
+      operationId: getCourse
+      summary: A course with its curriculum (sections and lectures)
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CourseDetail" }
+        default: { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [catalog]
+      operationId: updateCourse
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCourseRequest" }
+      responses:
+        "200":
+          description: Course updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [catalog]
+      operationId: deleteCourse
+      summary: Delete a course with all its sections, lectures and blocks
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Course deleted
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/publish:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+    post:
+      tags: [catalog]
+      operationId: publishCourse
+      summary: Publish a course on the school storefront (needs at least one published lecture)
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Course published
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/unpublish:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+    post:
+      tags: [catalog]
+      operationId: unpublishCourse
+      summary: Move a course back to draft (hidden from the storefront)
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Course is a draft again
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/reorder:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+    post:
+      tags: [catalog]
+      operationId: reorderCurriculum
+      summary: Set the order of sections and of lectures (lectures may move between sections)
+      description: |
+        The body lists every section of the course exactly once, each with every lecture that
+        should belong to it, in display order. Every lecture of the course must appear exactly once.
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CurriculumOrder" }
+      responses:
+        "200":
+          description: Curriculum in its new order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Curriculum" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/sections:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+    post:
+      tags: [catalog]
+      operationId: createSection
+      summary: Add a section at the end of the course
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SectionInput" }
+      responses:
+        "201":
+          description: Section created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Section" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/SectionId"
+    patch:
+      tags: [catalog]
+      operationId: updateSection
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SectionInput" }
+      responses:
+        "200":
+          description: Section updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Section" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [catalog]
+      operationId: deleteSection
+      summary: Delete a section with its lectures
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Section deleted
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/sections/{sectionId}/lectures:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/SectionId"
+    post:
+      tags: [catalog]
+      operationId: createLecture
+      summary: Add a lecture at the end of a section
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateLectureRequest" }
+      responses:
+        "201":
+          description: Lecture created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Lecture" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/LectureId"
+    get:
+      tags: [catalog]
+      operationId: getLecture
+      summary: A lecture with its content blocks
+      security: [{ sessionCookie: [] }]
+      responses:
+        "200":
+          description: Lecture
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LectureDetail" }
+        default: { $ref: "#/components/responses/Problem" }
+    patch:
+      tags: [catalog]
+      operationId: updateLecture
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateLectureRequest" }
+      responses:
+        "200":
+          description: Lecture updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Lecture" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [catalog]
+      operationId: deleteLecture
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Lecture deleted
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/reorder:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/LectureId"
+    post:
+      tags: [catalog]
+      operationId: reorderBlocks
+      summary: Set the order of a lecture's content blocks (every block exactly once)
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BlockOrder" }
+      responses:
+        "200":
+          description: Blocks in their new order
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Block" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/LectureId"
+    post:
+      tags: [catalog]
+      operationId: createBlock
+      summary: Add a content block at the end of a lecture
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateBlockRequest" }
+      responses:
+        "201":
+          description: Block created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Block" }
+        default: { $ref: "#/components/responses/Problem" }
+
+  /admin/schools/{schoolId}/courses/{courseId}/lectures/{lectureId}/blocks/{blockId}:
+    parameters:
+      - $ref: "#/components/parameters/SchoolId"
+      - $ref: "#/components/parameters/CourseId"
+      - $ref: "#/components/parameters/LectureId"
+      - $ref: "#/components/parameters/BlockId"
+    patch:
+      tags: [catalog]
+      operationId: updateBlock
+      security: [{ sessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateBlockRequest" }
+      responses:
+        "200":
+          description: Block updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Block" }
+        default: { $ref: "#/components/responses/Problem" }
+    delete:
+      tags: [catalog]
+      operationId: deleteBlock
+      security: [{ sessionCookie: [] }]
+      responses:
+        "204":
+          description: Block deleted
         default: { $ref: "#/components/responses/Problem" }
 
   /accounts/signup:
@@ -184,6 +553,33 @@ components:
       in: cookie
       name: sid
 
+  parameters:
+    SchoolId:
+      name: schoolId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    CourseId:
+      name: courseId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    SectionId:
+      name: sectionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    LectureId:
+      name: lectureId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    BlockId:
+      name: blockId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
   headers:
     SetSessionCookie:
       description: Session cookie (`sid`, or `__Host-sid` when served over HTTPS)
@@ -303,3 +699,255 @@ components:
         name: { type: string }
         locale: { $ref: "#/components/schemas/Locale" }
         createdAt: { type: string, format: date-time }
+
+    # ---- Catalog ----
+
+    Slug:
+      type: string
+      minLength: 1
+      maxLength: 80
+      pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+      description: URL name, lower-case letters, digits and single dashes, e.g. `intro-to-go`
+
+    CourseTitle:
+      type: string
+      minLength: 1
+      maxLength: 200
+
+    CourseStatus:
+      type: string
+      enum: [draft, published, archived]
+
+    LectureStatus:
+      type: string
+      enum: [draft, published]
+
+    Course:
+      type: object
+      required: [id, slug, title, subtitle, description, locale, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+        description: { type: string }
+        locale: { $ref: "#/components/schemas/Locale" }
+        status: { $ref: "#/components/schemas/CourseStatus" }
+        publishedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    CourseSummary:
+      type: object
+      required: [id, slug, title, status, sectionCount, lectureCount, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        status: { $ref: "#/components/schemas/CourseStatus" }
+        sectionCount: { type: integer }
+        lectureCount: { type: integer }
+        publishedAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    CreateCourseRequest:
+      type: object
+      required: [title]
+      properties:
+        title: { $ref: "#/components/schemas/CourseTitle" }
+        slug: { $ref: "#/components/schemas/Slug" }
+        subtitle: { type: string, maxLength: 300 }
+        description: { type: string, maxLength: 5000 }
+        locale: { $ref: "#/components/schemas/Locale" }
+
+    UpdateCourseRequest:
+      type: object
+      properties:
+        title: { $ref: "#/components/schemas/CourseTitle" }
+        slug: { $ref: "#/components/schemas/Slug" }
+        subtitle: { type: string, maxLength: 300 }
+        description: { type: string, maxLength: 5000 }
+        locale: { $ref: "#/components/schemas/Locale" }
+
+    CourseDetail:
+      type: object
+      required: [course, sections]
+      properties:
+        course: { $ref: "#/components/schemas/Course" }
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/Section" }
+
+    Curriculum:
+      type: object
+      required: [sections]
+      properties:
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/Section" }
+
+    CurriculumOrder:
+      type: object
+      required: [sections]
+      properties:
+        sections:
+          type: array
+          maxItems: 500
+          items: { $ref: "#/components/schemas/SectionOrder" }
+
+    SectionOrder:
+      type: object
+      required: [id, lectureIds]
+      properties:
+        id: { type: string, format: uuid }
+        lectureIds:
+          type: array
+          maxItems: 1000
+          items: { type: string, format: uuid }
+
+    Section:
+      type: object
+      required: [id, title, position, lectures]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        position: { type: integer }
+        lectures:
+          type: array
+          items: { $ref: "#/components/schemas/Lecture" }
+
+    SectionInput:
+      type: object
+      required: [title]
+      properties:
+        title: { $ref: "#/components/schemas/CourseTitle" }
+
+    Lecture:
+      type: object
+      required: [id, sectionId, title, position, isFreePreview, status, blockCount]
+      properties:
+        id: { type: string, format: uuid }
+        sectionId: { type: string, format: uuid }
+        title: { type: string }
+        position: { type: integer }
+        isFreePreview: { type: boolean }
+        status: { $ref: "#/components/schemas/LectureStatus" }
+        blockCount: { type: integer }
+
+    CreateLectureRequest:
+      type: object
+      required: [title]
+      properties:
+        title: { $ref: "#/components/schemas/CourseTitle" }
+
+    UpdateLectureRequest:
+      type: object
+      properties:
+        title: { $ref: "#/components/schemas/CourseTitle" }
+        isFreePreview: { type: boolean }
+        status: { $ref: "#/components/schemas/LectureStatus" }
+
+    LectureDetail:
+      type: object
+      required: [lecture, blocks]
+      properties:
+        lecture: { $ref: "#/components/schemas/Lecture" }
+        blocks:
+          type: array
+          items: { $ref: "#/components/schemas/Block" }
+
+    BlockKind:
+      type: string
+      enum: [text, pdf, video, embed]
+
+    BlockData:
+      type: object
+      description: |
+        Content of a block; which fields apply depends on the kind:
+        `text` uses `html` (sanitized on save), `embed` uses `url` (https), `pdf` uses `fileKey` and
+        `filename` (uploads arrive with the media module), `video` has none (see `mediaAssetId`).
+      additionalProperties: false
+      properties:
+        html: { type: string, maxLength: 200000 }
+        url: { type: string, maxLength: 2000 }
+        fileKey: { type: string, maxLength: 500 }
+        filename: { type: string, maxLength: 255 }
+
+    Block:
+      type: object
+      required: [id, kind, position, data]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { $ref: "#/components/schemas/BlockKind" }
+        position: { type: integer }
+        data: { $ref: "#/components/schemas/BlockData" }
+        mediaAssetId: { type: string, format: uuid }
+
+    CreateBlockRequest:
+      type: object
+      required: [kind]
+      properties:
+        kind: { $ref: "#/components/schemas/BlockKind" }
+        data: { $ref: "#/components/schemas/BlockData" }
+
+    UpdateBlockRequest:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: "#/components/schemas/BlockData" }
+
+    BlockOrder:
+      type: object
+      required: [blockIds]
+      properties:
+        blockIds:
+          type: array
+          maxItems: 500
+          items: { type: string, format: uuid }
+
+    # ---- Storefront catalog ----
+
+    StorefrontCourseSummary:
+      type: object
+      required: [id, slug, title, subtitle, locale, lectureCount]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+        locale: { $ref: "#/components/schemas/Locale" }
+        lectureCount: { type: integer }
+        publishedAt: { type: string, format: date-time }
+
+    StorefrontCourse:
+      type: object
+      required: [id, slug, title, subtitle, description, locale, sections]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+        description: { type: string }
+        locale: { $ref: "#/components/schemas/Locale" }
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/StorefrontSection" }
+
+    StorefrontSection:
+      type: object
+      required: [id, title, lectures]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        lectures:
+          type: array
+          items: { $ref: "#/components/schemas/StorefrontLecture" }
+
+    StorefrontLecture:
+      type: object
+      required: [id, title, isFreePreview]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        isFreePreview: { type: boolean }
+        durationSec: { type: integer }

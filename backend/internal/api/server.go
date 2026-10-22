@@ -16,6 +16,7 @@ import (
 	oapimw "github.com/oapi-codegen/nethttp-middleware"
 
 	"github.com/teatchable/backend/internal/api/gen"
+	"github.com/teatchable/backend/internal/modules/catalog"
 	"github.com/teatchable/backend/internal/modules/identity"
 	"github.com/teatchable/backend/internal/modules/school"
 	"github.com/teatchable/backend/internal/platform/config"
@@ -32,12 +33,14 @@ type Deps struct {
 	Resolver *tenant.Resolver
 	Identity *identity.Service
 	Schools  *school.Service
+	Catalog  *catalog.Service
 }
 
 // Server implements gen.StrictServerInterface.
 type Server struct {
 	identity *identity.Service
 	schools  *school.Service
+	catalog  *catalog.Service
 	resolver *tenant.Resolver
 	cookies  identity.Cookies
 }
@@ -51,7 +54,7 @@ func NewRouter(d Deps) (http.Handler, error) {
 		return nil, err
 	}
 	cookies := identity.Cookies{Secure: d.Config.CookieSecure}
-	srv := &Server{identity: d.Identity, schools: d.Schools, resolver: d.Resolver, cookies: cookies}
+	srv := &Server{identity: d.Identity, schools: d.Schools, catalog: d.Catalog, resolver: d.Resolver, cookies: cookies}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

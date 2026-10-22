@@ -29,6 +29,16 @@ type Config struct {
 	TrustProxy   bool          `env:"TRUST_PROXY" envDefault:"true"`
 	CookieSecure bool          `env:"COOKIE_SECURE" envDefault:"false"`
 	SessionTTL   time.Duration `env:"SESSION_TTL" envDefault:"720h"`
+
+	// Media / Bunny Stream
+	BunnyLibraryID string `env:"BUNNY_LIBRARY_ID" envDefault:""`
+	BunnyAPIKey    string `env:"BUNNY_API_KEY" envDefault:""`
+	BunnyTokenKey  string `env:"BUNNY_TOKEN_KEY" envDefault:""`
+	BunnyPullZone  string `env:"BUNNY_PULL_ZONE" envDefault:""`
+
+	// Moyasar
+	MoyasarSecretKey      string `env:"MOYASAR_SECRET_KEY" envDefault:""`
+	MoyasarPublishableKey string `env:"MOYASAR_PUBLISHABLE_KEY" envDefault:""`
 }
 
 func Load() (Config, error) {

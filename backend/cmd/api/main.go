@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/teatchable/backend/internal/api"
+	"github.com/teatchable/backend/internal/modules/catalog"
 	"github.com/teatchable/backend/internal/modules/identity"
 	"github.com/teatchable/backend/internal/modules/school"
 	"github.com/teatchable/backend/internal/platform/config"
@@ -56,6 +57,7 @@ func run() error {
 		Resolver: resolver,
 		Identity: identity.NewService(pool, schools, cfg.SessionTTL),
 		Schools:  schools,
+		Catalog:  catalog.NewService(pool),
 	})
 	if err != nil {
 		return err

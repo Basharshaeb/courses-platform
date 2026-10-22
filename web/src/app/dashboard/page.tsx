@@ -36,8 +36,11 @@ export default async function DashboardHome() {
                     {s.subdomain}.{hosts.rootDomain} · {t(`role.${s.role}`)}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <a href={site} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                <CardContent className="flex items-center gap-2">
+                  <a href={`/schools/${s.schoolId}/courses`} className={buttonVariants({ size: "sm" })}>
+                    إدارة الدورات
+                  </a>
+                  <a href={site} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
                     {t("visit")}
                   </a>
                 </CardContent>
