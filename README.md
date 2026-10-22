@@ -160,3 +160,4 @@ Demo credentials seeded via `task seed`:
 | `task test` | Run all unit and integration tests (race detector enabled) |
 | `task lint` | Run `golangci-lint` on backend and ESLint + TypeScript check on web |
 # courses-platform
+# courses-platform
